@@ -1,0 +1,46 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#game {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 0;
+}
+
+#joystick-container {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  z-index: 10;
+  touch-action: none;
+}
+
+#joystick {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  position: relative;
+  left: 30px;
+  top: 30px;
+  transition: transform 0.05s linear;
+}
