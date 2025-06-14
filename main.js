@@ -1,62 +1,26 @@
-let scene, camera, renderer;
-let raycaster;
+// main.js - Doom-style FPS for Web
 
-function init() {
-  scene = new THREE.Scene();
+let scene, camera, renderer; let walls = []; let raycaster;
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 1.6, 5);
+function init() { scene = new THREE.Scene();
 
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game") });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 ); camera.position.set(1, 1.6, 1);
 
-  // Add a simple floor
-  let floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(100, 100),
-    new THREE.MeshBasicMaterial({ color: 0x333333 })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  scene.add(floor);
+renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game") }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio);
 
-  // Add a red wall
-  let wall = new THREE.Mesh(
-    new THREE.BoxGeometry(2, 2, 0.5),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-  );
-  wall.position.set(0, 1, -5);
-  scene.add(wall);
+// Floor const floor = new THREE.Mesh( new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({ color: 0x222222 }) ); floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-  raycaster = new THREE.Raycaster();
+// Doom-style walls (simple boxy layout) const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x880000 }); const wallGeo = new THREE.BoxGeometry(1, 2, 0.2); const wallPositions = [ [2, 1, -1], [3, 1, -1], [4, 1, -1], [4, 1, 0], [4, 1, 1], [2, 1, 1], [3, 1, 1], [2, 1, 0] ];
 
-  // Shoot on tap
-  window.addEventListener("touchstart", shoot);
+for (let pos of wallPositions) { const wall = new THREE.Mesh(wallGeo, wallMaterial.clone()); wall.position.set(...pos); scene.add(wall); walls.push(wall); }
 
-  // Resize handler
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+raycaster = new THREE.Raycaster(); window.addEventListener("touchstart", shoot); window.addEventListener("resize", onWindowResize); animate(); }
 
-  animate();
-}
+function shoot() { raycaster.setFromCamera({ x: 0, y: 0 }, camera); const hits = raycaster.intersectObjects(walls); if (hits.length > 0) { hits[0].object.material.color.set(0x00ff00); } }
 
-function shoot() {
-  raycaster.setFromCamera({ x: 0, y: 0 }, camera);
-  const intersects = raycaster.intersectObjects(scene.children);
-  if (intersects.length > 0) {
-    intersects[0].object.material.color.set(0x00ff00); // turn green on hit
-  }
-}
+function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
 
-function animate() {
-  requestAnimationFrame(animate);
-
-  camera.translateZ(-joystick.dy * 0.1);
-  camera.translateX(joystick.dx * 0.1);
-
-  renderer.render(scene, camera);
-}
+function animate() { requestAnimationFrame(animate); camera.translateZ(-joystick.dy * 0.05); camera.translateX(joystick.dx * 0.05); renderer.render(scene, camera); }
 
 init();
+
