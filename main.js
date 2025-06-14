@@ -1,6 +1,6 @@
 // main.js - Doom-style FPS for Web
 
-let scene, camera, renderer; let walls = []; let raycaster;
+let scene, camera, renderer, controls; let walls = []; let raycaster; let textureLoader = new THREE.TextureLoader();
 
 function init() { scene = new THREE.Scene();
 
@@ -8,11 +8,15 @@ camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight
 
 renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game") }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio);
 
-// Floor const floor = new THREE.Mesh( new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({ color: 0x222222 }) ); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+// Add lighting const light = new THREE.HemisphereLight(0xffffff, 0x444444); light.position.set(0, 20, 0); scene.add(light);
 
-// Doom-style walls (simple boxy layout) const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x880000 }); const wallGeo = new THREE.BoxGeometry(1, 2, 0.2); const wallPositions = [ [2, 1, -1], [3, 1, -1], [4, 1, -1], [4, 1, 0], [4, 1, 1], [2, 1, 1], [3, 1, 1], [2, 1, 0] ];
+// Floor with texture const floorTex = textureLoader.load('https://threejs.org/examples/textures/grasslight-big.jpg'); floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(25, 25); const floor = new THREE.Mesh( new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ map: floorTex }) ); floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-for (let pos of wallPositions) { const wall = new THREE.Mesh(wallGeo, wallMaterial.clone()); wall.position.set(...pos); scene.add(wall); walls.push(wall); }
+// Doom-style maze walls const wallTex = textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg'); const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTex }); const wallGeo = new THREE.BoxGeometry(1, 2, 1); const wallLayout = [ [2, 1, -1], [3, 1, -1], [4, 1, -1], [4, 1, 0], [4, 1, 1], [2, 1, 1], [3, 1, 1], [2, 1, 0], [0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 2], [1, 1, 2], [2, 1, 2], [3, 1, 2], [4, 1, 2] ];
+
+for (let pos of wallLayout) { const wall = new THREE.Mesh(wallGeo, wallMaterial.clone()); wall.position.set(...pos); scene.add(wall); walls.push(wall); }
+
+// Gun overlay (2D sprite) const gunTex = textureLoader.load('https://i.imgur.com/2XnmnSg.png'); const gunMaterial = new THREE.SpriteMaterial({ map: gunTex, transparent: true }); const gun = new THREE.Sprite(gunMaterial); gun.scale.set(1, 0.5, 1); gun.position.set(0, -0.5, -1); camera.add(gun); scene.add(camera);
 
 raycaster = new THREE.Raycaster(); window.addEventListener("touchstart", shoot); window.addEventListener("resize", onWindowResize); animate(); }
 
