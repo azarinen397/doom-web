@@ -1,28 +1,37 @@
-let joystick = {
-  dx: 0,
-  dy: 0,
-  active: false
-};
+const joystickContainer = document.getElementById('joystick-container');
+const joystickElement = document.getElementById('joystick');
 
-const joystickContainer = document.getElementById("joystick-container");
-const joystickKnob = document.getElementById("joystick");
+let dragging = false;
+let originX, originY;
 
-joystickContainer.addEventListener("touchstart", (e) => {
-  joystick.active = true;
-}, { passive: false });
+joystick = { dx: 0, dy: 0 };
 
-joystickContainer.addEventListener("touchmove", (e) => {
-  const rect = joystickContainer.getBoundingClientRect();
+joystickContainer.addEventListener('touchstart', (e) => {
+  dragging = true;
   const touch = e.touches[0];
-  let x = touch.clientX - rect.left - 60;
-  let y = touch.clientY - rect.top - 60;
-  joystick.dx = Math.max(-1, Math.min(1, x / 60));
-  joystick.dy = Math.max(-1, Math.min(1, y / 60));
-  joystickKnob.style.transform = `translate(${joystick.dx * 30}px, ${joystick.dy * 30}px)`;
-}, { passive: false });
+  originX = touch.clientX;
+  originY = touch.clientY;
+});
 
-joystickContainer.addEventListener("touchend", () => {
+joystickContainer.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  const touch = e.touches[0];
+  const dx = touch.clientX - originX;
+  const dy = touch.clientY - originY;
+  const max = 40;
+
+  const clampedX = Math.max(-max, Math.min(max, dx));
+  const clampedY = Math.max(-max, Math.min(max, dy));
+
+  joystick.dx = clampedX / max;
+  joystick.dy = clampedY / max;
+
+  joystickElement.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+});
+
+joystickContainer.addEventListener('touchend', () => {
+  dragging = false;
   joystick.dx = 0;
   joystick.dy = 0;
-  joystickKnob.style.transform = `translate(0, 0)`;
+  joystickElement.style.transform = `translate(0px, 0px)`;
 });
